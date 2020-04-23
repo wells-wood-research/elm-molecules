@@ -6,15 +6,20 @@ module Biomolecules exposing
     , structuralDataCodec
     )
 
-{-| Library for representing biomolecular structure.
+{-| This module provides tools to working with biomolecular structure.
 
 
-# Loading Structure
+# Loading Structural Data
 
 @docs fetchStructuralData, parsePdbString, Error
 
 
 # Structure
+
+To avoid a myriad of problems that often arise when working this structural data,
+structure is represented by a flat list of `Atoms`. These lists of `Atoms` can then be
+processed into groups relating to connectivity. Functions to do this are described in
+the next section.
 
 @docs Atom, Residue, Chain, State, StructuralData
 
