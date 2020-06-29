@@ -46,7 +46,6 @@ for more information about using codecs
 import Codec exposing (Codec)
 import Dict
 import Http
-import Math.Vector3 exposing (Vec3, getX, getY, getZ, vec3)
 import Parser
     exposing
         ( (|.)
@@ -119,7 +118,11 @@ type alias Atom =
     , chainId : Maybe String
     , residueNumber : Int
     , insertionCode : Maybe String
-    , position : Vec3
+    , position :
+        { x : Float
+        , y : Float
+        , z : Float
+        }
     , occupancy : Maybe Float
     , temperatureFactor : Maybe Float
     , element : String
@@ -138,7 +141,7 @@ atomCodec =
         |> Codec.field "chainId" .chainId (Codec.maybe Codec.string)
         |> Codec.field "residueNumber" .residueNumber Codec.int
         |> Codec.field "insertionCode" .insertionCode (Codec.maybe Codec.string)
-        |> Codec.field "position" .position vec3Codec
+        |> Codec.field "position" .position positionCodec
         |> Codec.field "occupancy" .occupancy (Codec.maybe Codec.float)
         |> Codec.field "temperatureFactor" .temperatureFactor (Codec.maybe Codec.float)
         |> Codec.field "element" .element Codec.string
@@ -147,12 +150,12 @@ atomCodec =
         |> Codec.buildObject
 
 
-vec3Codec : Codec Vec3
-vec3Codec =
-    Codec.object vec3
-        |> Codec.field "x" getX Codec.float
-        |> Codec.field "y" getY Codec.float
-        |> Codec.field "z" getZ Codec.float
+positionCodec : Codec { x : Float, y : Float, z : Float }
+positionCodec =
+    Codec.object (\x y z -> { x = x, y = y, z = z })
+        |> Codec.field "x" .x Codec.float
+        |> Codec.field "y" .y Codec.float
+        |> Codec.field "z" .z Codec.float
         |> Codec.buildObject
 
 
@@ -345,7 +348,7 @@ pdbLineParser stateNumber =
         -- insertionCode
         |= maybeStringParser
         |. symbol ";"
-        |= vec3Parser
+        |= positionParser
         |. symbol ";"
         |= maybeFloat
         |. symbol ";"
@@ -402,9 +405,9 @@ checkForMaybeString string =
         succeed (Just string)
 
 
-vec3Parser : Parser Vec3
-vec3Parser =
-    succeed vec3
+positionParser : Parser { x : Float, y : Float, z : Float }
+positionParser =
+    succeed (\x y z -> { x = x, y = y, z = z })
         |= signedFloat
         |. symbol ";"
         |= signedFloat
